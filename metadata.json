@@ -1,0 +1,6 @@
+{
+  "name": "AI駆動型開発 演習進捗マネージャー",
+  "description": "AI駆動型システム開発（Python Breakout演習）の全11工程を可視化し、進捗一括管理・プロンプト即時活用・物理シミュレーション解説を提供するダッシュボード。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
