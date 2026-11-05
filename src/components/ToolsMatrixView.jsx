@@ -1,9 +1,9 @@
 import React from 'react';
-import { TOOLS_MATRIX } from '../data/curriculum';
+import { TOOLS_MATRIX } from '../data/curriculum.js';
 import { Layers, Terminal, Monitor, Sparkles } from 'lucide-react';
 
-export const ToolsMatrixView: React.FC = () => {
-  const getToolIcon = (name: string) => {
+export function ToolsMatrixView() {
+  const getToolIcon = (name) => {
     if (name.includes('Studio')) return <Sparkles className="w-5 h-5 text-amber-400" />;
     if (name.includes('Desktop')) return <Monitor className="w-5 h-5 text-cyan-400" />;
     return <Terminal className="w-5 h-5 text-emerald-400" />;
@@ -73,4 +73,4 @@ export const ToolsMatrixView: React.FC = () => {
       </div>
     </div>
   );
-};
+}

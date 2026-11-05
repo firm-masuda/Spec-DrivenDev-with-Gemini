@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { Step } from '../data/curriculum';
-import { StepProgressState, StepStatus } from '../types/progress';
 import {
   CheckCircle2,
   Clock,
-  CircleDot,
   Copy,
   Check,
   ChevronDown,
@@ -13,34 +10,21 @@ import {
   FileCode,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
-  Terminal,
-  ExternalLink
+  Sparkles
 } from 'lucide-react';
 
-interface StepDetailCardProps {
-  step: Step;
-  stepProgress: StepProgressState;
-  onUpdateStatus: (stepId: string, status: StepStatus) => void;
-  onToggleCheckpoint: (stepId: string, checkpointId: string) => void;
-  onUpdateNotes: (stepId: string, notes: string) => void;
-  onNavigate: (stepId: string) => void;
-  prevStepId?: string;
-  nextStepId?: string;
-}
-
-export const StepDetailCard: React.FC<StepDetailCardProps> = ({
+export function StepDetailCard({
   step,
-  stepProgress,
+  stepProgress = { status: 'not-started', completedCheckpoints: [], notes: '' },
   onUpdateStatus,
   onToggleCheckpoint,
   onUpdateNotes,
   onNavigate,
   prevStepId,
   nextStepId
-}) => {
+}) {
   const [copiedPrompt, setCopiedPrompt] = useState(false);
-  const [copiedSnippetIndex, setCopiedSnippetIndex] = useState<number | null>(null);
+  const [copiedSnippetIndex, setCopiedSnippetIndex] = useState(null);
   const [showIntent, setShowIntent] = useState(true);
 
   const handleCopyPrompt = () => {
@@ -50,7 +34,7 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
     setTimeout(() => setCopiedPrompt(false), 2000);
   };
 
-  const handleCopySnippet = (code: string, index: number) => {
+  const handleCopySnippet = (code, index) => {
     navigator.clipboard.writeText(code);
     setCopiedSnippetIndex(index);
     setTimeout(() => setCopiedSnippetIndex(null), 2000);
@@ -60,7 +44,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-      {/* Top Banner & Title */}
       <div className="p-6 border-b border-slate-800/80 bg-slate-950/60">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
@@ -77,7 +60,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
             ))}
           </div>
 
-          {/* Status selector buttons */}
           <div className="flex items-center gap-1.5 p-1 bg-slate-950 rounded-lg border border-slate-800">
             <button
               onClick={() => onUpdateStatus(step.id, 'not-started')}
@@ -131,7 +113,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
       </div>
 
       <div className="p-6 space-y-6">
-        {/* Goal highlight callout */}
         <div className="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/30">
           <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
             <Sparkles className="w-4 h-4" />
@@ -142,7 +123,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
           </p>
         </div>
 
-        {/* Step 01 specific: Temperature note */}
         {step.id === 'step-01' && (
           <div className="p-4 rounded-xl bg-amber-950/20 border border-amber-500/40 text-xs space-y-1.5">
             <div className="font-bold text-amber-400 flex items-center gap-1.5">
@@ -158,7 +138,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
           </div>
         )}
 
-        {/* Practical Steps */}
         <div className="space-y-3">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
             実践ステップ
@@ -186,7 +165,7 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
                         {s.codeSnippet}
                       </pre>
                       <button
-                        onClick={() => handleCopySnippet(s.codeSnippet!, idx)}
+                        onClick={() => handleCopySnippet(s.codeSnippet, idx)}
                         className="absolute top-2 right-2 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs flex items-center gap-1 opacity-90 group-hover:opacity-100 transition shadow"
                       >
                         {copiedSnippetIndex === idx ? (
@@ -209,7 +188,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
           </div>
         </div>
 
-        {/* Prompt Card (If prompt exists) */}
         {step.prompt && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -242,7 +220,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
           </div>
         )}
 
-        {/* Design Intent (Why this step is needed) */}
         <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950/40">
           <button
             onClick={() => setShowIntent(!showIntent)}
@@ -272,7 +249,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
           )}
         </div>
 
-        {/* Checkpoints for this step */}
         <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3">
           <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
             工程完了チェックポイント
@@ -303,7 +279,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
           </div>
         </div>
 
-        {/* Step Notes / Memo */}
         <div className="space-y-2">
           <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
             作業メモ・エラーログ記録（自動保存）
@@ -317,7 +292,6 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
           />
         </div>
 
-        {/* Navigation bottom bar */}
         <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
           {prevStepId ? (
             <button
@@ -344,4 +318,4 @@ export const StepDetailCard: React.FC<StepDetailCardProps> = ({
       </div>
     </div>
   );
-};
+}

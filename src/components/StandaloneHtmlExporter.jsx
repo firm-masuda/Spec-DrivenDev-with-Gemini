@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Download, Code2, Copy, Check, Sparkles } from 'lucide-react';
-import { generateStandaloneHtml } from '../utils/generateStandaloneHtml';
+import { generateStandaloneHtml } from '../utils/generateStandaloneHtml.js';
 
-export const StandaloneHtmlExporter: React.FC = () => {
+export function StandaloneHtmlExporter() {
   const [copiedCode, setCopiedCode] = useState(false);
   const [showCodePreview, setShowCodePreview] = useState(false);
 
@@ -92,4 +92,4 @@ export const StandaloneHtmlExporter: React.FC = () => {
       )}
     </div>
   );
-};
+}

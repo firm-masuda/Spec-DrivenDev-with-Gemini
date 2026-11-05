@@ -1,23 +1,4 @@
-export type StepStatus = 'not-started' | 'in-progress' | 'completed';
-
-export interface StepProgressState {
-  status: StepStatus;
-  completedCheckpoints: string[];
-  notes: string;
-  updatedAt?: string;
-  timeSpentMinutes?: number;
-}
-
-export interface UserProgressData {
-  userName: string;
-  organization: string;
-  startedAt: string;
-  lastActiveAt: string;
-  steps: Record<string, StepProgressState>;
-  evaluations: Record<string, boolean>; // id -> checked
-}
-
-export const DEFAULT_USER_PROGRESS: UserProgressData = {
+export const DEFAULT_USER_PROGRESS = {
   userName: '受講生A',
   organization: '社内AI駆動開発研修',
   startedAt: new Date().toISOString(),

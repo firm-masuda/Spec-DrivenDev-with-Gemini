@@ -1,35 +1,18 @@
 import React from 'react';
-import { CURRICULUM_STEPS, Step } from '../data/curriculum';
-import { UserProgressData } from '../types/progress';
+import { CURRICULUM_STEPS } from '../data/curriculum.js';
 import { CheckCircle2, Clock, CircleDot, ArrowRight, ArrowLeftRight } from 'lucide-react';
 
-interface VModelProgressMapProps {
-  progress: UserProgressData;
-  activeStepId: string;
-  onSelectStep: (stepId: string) => void;
-}
-
-export const VModelProgressMap: React.FC<VModelProgressMapProps> = ({
-  progress,
+export function VModelProgressMap({
+  progress = { steps: {} },
   activeStepId,
   onSelectStep
-}) => {
-  // Left branch (Design / Downwards): 01, 02, 03, 04, 05
-  // Valley (Implementation): 06, EX
-  // Right branch (Testing / Upwards): 07, 08, 09, 10
-  const pairs = [
-    { leftId: 'step-01', rightId: 'step-09', relation: '受入テストで検証' },
-    { leftId: 'step-02', rightId: 'step-08', relation: 'システムテストで検証' },
-    { leftId: 'step-03', rightId: 'step-07', relation: '結合テストで検証' },
-    { leftId: 'step-05', rightId: 'step-06', relation: '単体テストで検証' }
-  ];
-
-  const getStepById = (id: string): Step => {
-    return CURRICULUM_STEPS.find(s => s.id === id)!;
+}) {
+  const getStepById = (id) => {
+    return CURRICULUM_STEPS.find(s => s.id === id);
   };
 
-  const getStatusBadge = (stepId: string) => {
-    const s = progress.steps[stepId]?.status || 'not-started';
+  const getStatusBadge = (stepId) => {
+    const s = progress.steps?.[stepId]?.status || 'not-started';
     if (s === 'completed') {
       return (
         <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
@@ -54,9 +37,10 @@ export const VModelProgressMap: React.FC<VModelProgressMapProps> = ({
     );
   };
 
-  const renderNode = (step: Step, align: 'left' | 'right' | 'center') => {
+  const renderNode = (step, align) => {
+    if (!step) return null;
     const isSelected = activeStepId === step.id;
-    const s = progress.steps[step.id]?.status || 'not-started';
+    const s = progress.steps?.[step.id]?.status || 'not-started';
 
     const borderClass = isSelected
       ? 'border-cyan-400 ring-2 ring-cyan-500/30 bg-slate-900 shadow-lg shadow-cyan-950/50'
@@ -116,9 +100,7 @@ export const VModelProgressMap: React.FC<VModelProgressMapProps> = ({
         </div>
       </div>
 
-      {/* V-Model Matrix layout */}
       <div className="space-y-3.5">
-        {/* Tier 1: 01 要求定義 <---> 09 受入テスト */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           <div className="md:col-span-5">{renderNode(getStepById('step-01'), 'left')}</div>
           <div className="hidden md:flex md:col-span-2 flex-col items-center justify-center text-center px-1">
@@ -131,7 +113,6 @@ export const VModelProgressMap: React.FC<VModelProgressMapProps> = ({
           <div className="md:col-span-5">{renderNode(getStepById('step-09'), 'right')}</div>
         </div>
 
-        {/* Tier 2: 02 要件定義 <---> 08 システムテスト */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           <div className="md:col-span-5 pl-0 md:pl-4">{renderNode(getStepById('step-02'), 'left')}</div>
           <div className="hidden md:flex md:col-span-2 flex-col items-center justify-center text-center px-1">
@@ -144,7 +125,6 @@ export const VModelProgressMap: React.FC<VModelProgressMapProps> = ({
           <div className="md:col-span-5 pr-0 md:pr-4">{renderNode(getStepById('step-08'), 'right')}</div>
         </div>
 
-        {/* Tier 3: 03 基本設計 <---> 07 結合テスト */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           <div className="md:col-span-5 pl-0 md:pl-8">{renderNode(getStepById('step-03'), 'left')}</div>
           <div className="hidden md:flex md:col-span-2 flex-col items-center justify-center text-center px-1">
@@ -157,7 +137,6 @@ export const VModelProgressMap: React.FC<VModelProgressMapProps> = ({
           <div className="md:col-span-5 pr-0 md:pr-8">{renderNode(getStepById('step-07'), 'right')}</div>
         </div>
 
-        {/* Tier 4: 04 環境整備 (Gate) */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           <div className="md:col-span-5 pl-0 md:pl-12">
             {renderNode(getStepById('step-04'), 'left')}
@@ -172,7 +151,6 @@ export const VModelProgressMap: React.FC<VModelProgressMapProps> = ({
           </div>
         </div>
 
-        {/* Tier 5: 05 詳細設計 <---> 06 実装・単体テスト (Valley of the V) */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           <div className="md:col-span-5 pl-0 md:pl-16">{renderNode(getStepById('step-05'), 'left')}</div>
           <div className="hidden md:flex md:col-span-2 flex-col items-center justify-center text-center px-1">
@@ -185,7 +163,6 @@ export const VModelProgressMap: React.FC<VModelProgressMapProps> = ({
           <div className="md:col-span-5 pr-0 md:pr-16">{renderNode(getStepById('step-06'), 'right')}</div>
         </div>
 
-        {/* Valley Bottom: Special Exercise EX */}
         <div className="pt-2 flex justify-center">
           <div className="w-full md:w-3/5 border-t border-dashed border-amber-500/30 pt-3">
             <div className="text-center text-[11px] font-mono text-amber-400 mb-1.5 font-semibold">
@@ -197,4 +174,4 @@ export const VModelProgressMap: React.FC<VModelProgressMapProps> = ({
       </div>
     </div>
   );
-};
+}

@@ -1,18 +1,7 @@
 import React from 'react';
-import { ArrowRight, FileText, CheckCircle, Terminal, Monitor, Sparkles } from 'lucide-react';
+import { FileText, Terminal, Monitor, Sparkles } from 'lucide-react';
 
-export interface StepFlowItem {
-  order: string;
-  name: string;
-  tool: string;
-  toolCategory: 'studio' | 'desktop' | 'ide' | 'hybrid';
-  input: string;
-  output: string;
-  verificationTarget?: string;
-  keyPoint: string;
-}
-
-export const STEP_FLOW_ITEMS: StepFlowItem[] = [
+export const STEP_FLOW_ITEMS = [
   {
     order: '01',
     name: '要求定義 (Business Requirements)',
@@ -122,8 +111,8 @@ export const STEP_FLOW_ITEMS: StepFlowItem[] = [
   }
 ];
 
-export const CurriculumOverviewTable: React.FC = () => {
-  const getToolBadge = (tool: string, category: string) => {
+export function CurriculumOverviewTable() {
+  const getToolBadge = (tool, category) => {
     if (category === 'studio') {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/30">
@@ -211,4 +200,4 @@ export const CurriculumOverviewTable: React.FC = () => {
       </div>
     </div>
   );
-};
+}

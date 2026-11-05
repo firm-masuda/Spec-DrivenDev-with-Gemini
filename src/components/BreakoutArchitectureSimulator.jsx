@@ -1,36 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, ShieldCheck, Zap, Activity, Info, Eye } from 'lucide-react';
 
-interface Brick {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  hp: number;
-  maxHp: number;
-  color: string;
-  points: number;
-}
-
-export const BreakoutArchitectureSimulator: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+export function BreakoutArchitectureSimulator() {
+  const canvasRef = useRef(null);
 
   // Simulation controls
-  const [gameState, setGameState] = useState<'READY' | 'PLAYING' | 'PAUSED' | 'GAMEOVER' | 'VICTORY'>('READY');
+  const [gameState, setGameState] = useState('READY');
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(1200);
   const [lives, setLives] = useState(3);
   const [showHitboxes, setShowHitboxes] = useState(true);
   const [enableHardBricks, setEnableHardBricks] = useState(true);
-  const [simSpeed, setSimSpeed] = useState<number>(1);
-  const [lastTickDuration, setLastTickDuration] = useState<number>(0.35);
-  const [activeTab, setActiveTab] = useState<'simulator' | 'architecture'>('simulator');
+  const [simSpeed, setSimSpeed] = useState(1);
+  const [lastTickDuration, setLastTickDuration] = useState(0.35);
+  const [activeTab, setActiveTab] = useState('simulator');
 
   // Game internal state
   const paddleRef = useRef({ x: 160, y: 260, w: 80, h: 10, speed: 6, vx: 0 });
   const ballRef = useRef({ x: 200, y: 245, r: 6, vx: 3.2, vy: -3.2 });
-  const bricksRef = useRef<Brick[]>([]);
-  const keysRef = useRef<{ left: boolean; right: boolean }>({ left: false, right: false });
+  const bricksRef = useRef([]);
+  const keysRef = useRef({ left: false, right: false });
 
   // Initialize Bricks
   const initBricks = () => {
@@ -41,7 +30,7 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
     const pad = 6;
     const offsetX = 10;
     const offsetY = 35;
-    const newBricks: Brick[] = [];
+    const newBricks = [];
 
     const rowColors = ['#f59e0b', '#06b6d4', '#3b82f6', '#8b5cf6'];
     const rowPoints = [200, 100, 50, 20];
@@ -80,7 +69,7 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
 
   // Key event listeners
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e) => {
       if (e.key === 'ArrowLeft' || e.key === 'a') keysRef.current.left = true;
       if (e.key === 'ArrowRight' || e.key === 'd') keysRef.current.right = true;
       if (e.key === ' ' || e.code === 'Space') {
@@ -97,7 +86,7 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
       }
     };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
+    const handleKeyUp = (e) => {
       if (e.key === 'ArrowLeft' || e.key === 'a') keysRef.current.left = false;
       if (e.key === 'ArrowRight' || e.key === 'd') keysRef.current.right = false;
     };
@@ -112,7 +101,7 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
 
   // Main game loop (Separated Pure Engine tick)
   useEffect(() => {
-    let animId: number;
+    let animId;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -157,7 +146,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
           b.vy > 0
         ) {
           b.vy = -Math.abs(b.vy);
-          // Angle modifier based on hit position
           const hitOffset = (b.x - (p.x + p.w / 2)) / (p.w / 2);
           b.vx = hitOffset * 4.5;
         }
@@ -186,10 +174,9 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
               });
               remainingBricks--;
             } else {
-              // Damaged hard brick
               brick.color = '#94a3b8';
             }
-            break; // Max 1 brick collision per frame
+            break;
           }
         }
 
@@ -205,7 +192,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
           if (nextLives <= 0) {
             setGameState('GAMEOVER');
           } else {
-            // Reset ball position
             b.x = p.x + p.w / 2;
             b.y = p.y - 12;
             b.vx = (Math.random() > 0.5 ? 1 : -1) * 3;
@@ -219,7 +205,7 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
       const tickDuration = performance.now() - startTime;
       setLastTickDuration(Math.max(0.12, tickDuration));
 
-      // 2. VIEW RENDER (Tkinter-equivalent Canvas drawing)
+      // 2. VIEW RENDER (Canvas drawing)
       ctx.fillStyle = '#090d16';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -245,11 +231,9 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
         ctx.fillStyle = brick.color;
         ctx.fillRect(brick.x, brick.y, brick.w, brick.h);
 
-        // Subtle inner shine
         ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.fillRect(brick.x, brick.y, brick.w, 2);
 
-        // If hard brick with 2 HP, draw silver indicator
         if (brick.maxHp === 2 && brick.hp === 2) {
           ctx.strokeStyle = '#f8fafc';
           ctx.lineWidth = 1.5;
@@ -259,7 +243,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
           ctx.fillText('2x', brick.x + brick.w / 2 - 5, brick.y + 10);
         }
 
-        // Hitbox overlay
         if (showHitboxes) {
           ctx.strokeStyle = '#ef4444';
           ctx.lineWidth = 0.8;
@@ -274,7 +257,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
       ctx.roundRect(p.x, p.y, p.w, p.h, 4);
       ctx.fill();
 
-      // Hitbox for paddle
       if (showHitboxes) {
         ctx.strokeStyle = '#10b981';
         ctx.lineWidth = 1;
@@ -288,13 +270,11 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
       ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
       ctx.fill();
 
-      // Hitbox for ball (AABB bounding box)
       if (showHitboxes) {
         ctx.strokeStyle = '#38bdf8';
         ctx.lineWidth = 1;
         ctx.strokeRect(b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
 
-        // Velocity vector line
         ctx.strokeStyle = '#fbbf24';
         ctx.beginPath();
         ctx.moveTo(b.x, b.y);
@@ -346,8 +326,7 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
     return () => cancelAnimationFrame(animId);
   }, [gameState, simSpeed, lives, score, highScore, showHitboxes]);
 
-  // Touch / mouse paddle movement
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (e) => {
     if (gameState !== 'PLAYING') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -360,7 +339,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
-      {/* Header bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-800/80 bg-slate-950/40">
         <div className="flex items-center gap-2.5">
           <Activity className="w-5 h-5 text-cyan-400" />
@@ -394,10 +372,8 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
 
       {activeTab === 'simulator' ? (
         <div className="p-5 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Canvas stage */}
           <div className="lg:col-span-7 flex flex-col items-center">
             <div className="relative border-2 border-slate-700/60 rounded-lg overflow-hidden bg-[#090d16] shadow-inner">
-              {/* Telemetry bar on top of canvas */}
               <div className="flex items-center justify-between px-3 py-1.5 bg-slate-950/80 border-b border-slate-800 text-xs font-mono tabular-nums text-slate-300">
                 <div className="flex items-center gap-3">
                   <span>SCORE: <strong className="text-cyan-400">{score}</strong></span>
@@ -421,14 +397,12 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
                 className="cursor-crosshair block w-full max-w-[400px] h-[280px]"
               />
 
-              {/* In-canvas controls indicator */}
               <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[11px] text-slate-500 pointer-events-none px-2 py-0.5 bg-slate-950/70 rounded">
                 <span>[←][→] または マウス操作</span>
                 <span>[SPACE] 発射 / ポーズ</span>
               </div>
             </div>
 
-            {/* Quick interactive buttons for mobile / mouse */}
             <div className="flex items-center gap-2 mt-3 w-full max-w-[400px] justify-between">
               <button
                 onMouseDown={() => (keysRef.current.left = true)}
@@ -486,16 +460,13 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
             </div>
           </div>
 
-          {/* Configuration and Teaching Parameters */}
           <div className="lg:col-span-5 flex flex-col justify-between space-y-4 text-xs">
-            {/* Spec verification toggles */}
             <div className="space-y-3 bg-slate-950/40 p-3.5 rounded-lg border border-slate-800/80">
               <div className="font-semibold text-slate-200 flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5 text-amber-400" />
                 <span>演習仕様の検証トグル</span>
               </div>
 
-              {/* Hitbox visibility */}
               <label className="flex items-center justify-between text-slate-300 cursor-pointer">
                 <span className="flex items-center gap-1.5">
                   <Eye className="w-3.5 h-3.5 text-cyan-400" />
@@ -509,7 +480,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
                 />
               </label>
 
-              {/* Hard block (EX-2 spec) */}
               <label className="flex items-center justify-between text-slate-300 cursor-pointer">
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
@@ -523,7 +493,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
                 />
               </label>
 
-              {/* Sim speed */}
               <div className="pt-2 border-t border-slate-800/60">
                 <div className="flex items-center justify-between text-slate-400 mb-1">
                   <span>シミュレーション速度:</span>
@@ -547,7 +516,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
               </div>
             </div>
 
-            {/* Teaching notes connected to the manual */}
             <div className="bg-slate-950/60 p-3.5 rounded-lg border border-slate-800/80 space-y-2">
               <div className="font-semibold text-slate-200 flex items-center gap-1.5">
                 <Info className="w-3.5 h-3.5 text-cyan-400" />
@@ -571,10 +539,8 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* Architecture diagram tab */
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Layer 1: Model / Engine */}
             <div className="bg-slate-950/60 border border-cyan-500/30 rounded-xl p-4 relative">
               <div className="text-[11px] font-mono text-cyan-400 font-semibold mb-1">LAYER 1 (HEADLESS)</div>
               <h4 className="text-sm font-bold text-white mb-2">Model &amp; Engine 層</h4>
@@ -588,7 +554,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
               </div>
             </div>
 
-            {/* Layer 2: Storage */}
             <div className="bg-slate-950/60 border border-amber-500/30 rounded-xl p-4 relative">
               <div className="text-[11px] font-mono text-amber-400 font-semibold mb-1">LAYER 2 (PERSISTENCE)</div>
               <h4 className="text-sm font-bold text-white mb-2">Storage 層</h4>
@@ -602,7 +567,6 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
               </div>
             </div>
 
-            {/* Layer 3: View / Controller */}
             <div className="bg-slate-950/60 border border-purple-500/30 rounded-xl p-4 relative">
               <div className="text-[11px] font-mono text-purple-400 font-semibold mb-1">LAYER 3 (GUI VIEW)</div>
               <h4 className="text-sm font-bold text-white mb-2">View &amp; Controller 層</h4>
@@ -616,41 +580,8 @@ export const BreakoutArchitectureSimulator: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* State machine diagram */}
-          <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-4">
-            <h4 className="text-xs font-semibold text-slate-300 mb-3 flex items-center gap-2">
-              <span>ステートマシン状態遷移 (5つのゲーム状態)</span>
-            </h4>
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex-1 min-w-[120px] bg-slate-900 border border-slate-700/80 p-2.5 rounded-lg text-center">
-                <div className="font-mono text-cyan-400 font-bold">READY</div>
-                <div className="text-[11px] text-slate-400 mt-1">開始待機</div>
-              </div>
-              <div className="text-slate-500 text-xs">SPACE ▶</div>
-              <div className="flex-1 min-w-[120px] bg-slate-900 border border-cyan-500/50 p-2.5 rounded-lg text-center shadow-lg shadow-cyan-900/20">
-                <div className="font-mono text-white font-bold">PLAYING</div>
-                <div className="text-[11px] text-cyan-400 mt-1">プレイ中 (60FPS)</div>
-              </div>
-              <div className="text-slate-500 text-xs">P / 残機0 / クリア</div>
-              <div className="flex-1 min-w-[120px] space-y-2">
-                <div className="bg-slate-900 border border-amber-500/40 p-1.5 rounded text-center">
-                  <span className="font-mono text-amber-400 font-bold">PAUSED</span>
-                  <span className="text-[10px] text-slate-400 ml-1.5">一時停止</span>
-                </div>
-                <div className="bg-slate-900 border border-rose-500/40 p-1.5 rounded text-center">
-                  <span className="font-mono text-rose-400 font-bold">GAMEOVER</span>
-                  <span className="text-[10px] text-slate-400 ml-1.5">残機0</span>
-                </div>
-                <div className="bg-slate-900 border border-emerald-500/40 p-1.5 rounded text-center">
-                  <span className="font-mono text-emerald-400 font-bold">VICTORY</span>
-                  <span className="text-[10px] text-slate-400 ml-1.5">全破壊</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </div>
   );
-};
+}

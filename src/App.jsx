@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { CURRICULUM_STEPS, Step } from './data/curriculum';
-import { UserProgressData, DEFAULT_USER_PROGRESS, StepStatus } from './types/progress';
-import { VModelProgressMap } from './components/VModelProgressMap';
-import { StepDetailCard } from './components/StepDetailCard';
-import { BreakoutArchitectureSimulator } from './components/BreakoutArchitectureSimulator';
-import { EvaluationChecklistModal } from './components/EvaluationChecklistModal';
-import { ToolsMatrixView } from './components/ToolsMatrixView';
-import { StandaloneHtmlExporter } from './components/StandaloneHtmlExporter';
-import { CurriculumOverviewTable } from './components/CurriculumOverviewTable';
+import { CURRICULUM_STEPS } from './data/curriculum.js';
+import { DEFAULT_USER_PROGRESS } from './types/progress.js';
+import { VModelProgressMap } from './components/VModelProgressMap.jsx';
+import { StepDetailCard } from './components/StepDetailCard.jsx';
+import { BreakoutArchitectureSimulator } from './components/BreakoutArchitectureSimulator.jsx';
+import { EvaluationChecklistModal } from './components/EvaluationChecklistModal.jsx';
+import { ToolsMatrixView } from './components/ToolsMatrixView.jsx';
+import { StandaloneHtmlExporter } from './components/StandaloneHtmlExporter.jsx';
+import { CurriculumOverviewTable } from './components/CurriculumOverviewTable.jsx';
 import {
   BookOpen,
   CheckCircle2,
@@ -28,7 +28,7 @@ import {
 const STORAGE_KEY = 'ai_driven_breakout_progress_v1';
 
 export default function App() {
-  const [progress, setProgress] = useState<UserProgressData>(() => {
+  const [progress, setProgress] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) return JSON.parse(saved);
@@ -38,12 +38,11 @@ export default function App() {
     return DEFAULT_USER_PROGRESS;
   });
 
-  const [activeTab, setActiveTab] = useState<'map' | 'curriculum' | 'flow' | 'simulator' | 'evaluation' | 'tools' | 'standalone'>('map');
-  const [activeStepId, setActiveStepId] = useState<string>('step-01');
+  const [activeTab, setActiveTab] = useState('map');
+  const [activeStepId, setActiveStepId] = useState('step-01');
   const [copiedSummary, setCopiedSummary] = useState(false);
   const [isEditingUser, setIsEditingUser] = useState(false);
 
-  // Sync to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
@@ -52,14 +51,12 @@ export default function App() {
     }
   }, [progress]);
 
-  // Derived progress statistics
   const totalSteps = CURRICULUM_STEPS.length;
-  const completedStepsCount = Object.values(progress.steps).filter(s => s.status === 'completed').length;
-  const inProgressStepsCount = Object.values(progress.steps).filter(s => s.status === 'in-progress').length;
+  const completedStepsCount = Object.values(progress.steps || {}).filter(s => s.status === 'completed').length;
+  const inProgressStepsCount = Object.values(progress.steps || {}).filter(s => s.status === 'in-progress').length;
   const overallPercentage = Math.round((completedStepsCount / totalSteps) * 100);
 
-  // Step Status Update Handlers
-  const handleUpdateStatus = (stepId: string, status: StepStatus) => {
+  const handleUpdateStatus = (stepId, status) => {
     setProgress(prev => ({
       ...prev,
       lastActiveAt: new Date().toISOString(),
@@ -74,7 +71,7 @@ export default function App() {
     }));
   };
 
-  const handleToggleCheckpoint = (stepId: string, checkpointId: string) => {
+  const handleToggleCheckpoint = (stepId, checkpointId) => {
     setProgress(prev => {
       const current = prev.steps[stepId]?.completedCheckpoints || [];
       const updated = current.includes(checkpointId)
@@ -96,7 +93,7 @@ export default function App() {
     });
   };
 
-  const handleUpdateNotes = (stepId: string, notes: string) => {
+  const handleUpdateNotes = (stepId, notes) => {
     setProgress(prev => ({
       ...prev,
       steps: {
@@ -109,7 +106,7 @@ export default function App() {
     }));
   };
 
-  const handleToggleEvaluationItem = (id: string) => {
+  const handleToggleEvaluationItem = (id) => {
     setProgress(prev => ({
       ...prev,
       evaluations: {
@@ -138,13 +135,13 @@ export default function App() {
     downloadAnchor.remove();
   };
 
-  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportJson = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const parsed = JSON.parse(event.target?.result as string);
+        const parsed = JSON.parse(event.target?.result);
         if (parsed.steps) {
           setProgress(parsed);
           alert('進捗データをインポートしました！');
@@ -163,7 +160,7 @@ export default function App() {
     report += `進行中工程数: ${inProgressStepsCount}\n\n`;
     report += `--- 工程別ステータス ---\n`;
     CURRICULUM_STEPS.forEach(s => {
-      const st = progress.steps[s.id]?.status || 'not-started';
+      const st = progress.steps?.[s.id]?.status || 'not-started';
       const mark = st === 'completed' ? '完了' : st === 'in-progress' ? '進行中' : '未着手';
       report += `[${mark}] 工程${s.orderNumber}: ${s.title.split('(')[0].trim()} (${s.artifact})\n`;
     });
@@ -172,7 +169,6 @@ export default function App() {
     setTimeout(() => setCopiedSummary(false), 2000);
   };
 
-  // Navigation helpers
   const currentStep = CURRICULUM_STEPS.find(s => s.id === activeStepId) || CURRICULUM_STEPS[0];
   const currentStepIndex = CURRICULUM_STEPS.findIndex(s => s.id === activeStepId);
   const prevStepId = currentStepIndex > 0 ? CURRICULUM_STEPS[currentStepIndex - 1].id : undefined;
@@ -180,9 +176,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/* Top Bar Contract (3 Zones) */}
       <header className="sticky top-0 z-50 bg-[#090d16]/95 backdrop-blur border-b border-slate-800/80 px-6 py-3.5 flex items-center justify-between gap-8">
-        {/* Zone 1: Brand wordmark */}
         <div className="flex items-center gap-3 whitespace-nowrap shrink-0">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-slate-950 font-bold text-sm shadow-md shadow-cyan-900/30">
             AI
@@ -192,7 +186,6 @@ export default function App() {
           </span>
         </div>
 
-        {/* Zone 2: Navigation Links */}
         <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-400">
           <button
             onClick={() => setActiveTab('map')}
@@ -259,7 +252,6 @@ export default function App() {
           </button>
         </nav>
 
-        {/* Zone 3: Primary Action */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={handleCopyProgressReport}
@@ -280,10 +272,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* KPI & Status Dashboard Strip */}
       <section className="border-b border-slate-800/80 bg-slate-950/40 px-6 py-4">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-          {/* User profile & Progress Bar */}
           <div className="flex items-center gap-4 min-w-[280px]">
             <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400">
               <User className="w-5 h-5" />
@@ -321,7 +311,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Progress gauge bar */}
           <div className="flex-1 max-w-md min-w-[220px]">
             <div className="flex items-center justify-between text-xs font-semibold mb-1">
               <span className="text-slate-300">全体進捗率</span>
@@ -335,7 +324,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Controls: Reset / Export / Import */}
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportJson}
@@ -366,9 +354,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
-        {/* Mobile Navigation Tabs */}
         <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 text-xs font-semibold border-b border-slate-800">
           <button
             onClick={() => setActiveTab('map')}
@@ -428,7 +414,6 @@ export default function App() {
           </button>
         </div>
 
-        {/* Tab 1: V-Model Map & Active Step View */}
         {activeTab === 'map' && (
           <div className="space-y-6">
             <VModelProgressMap
@@ -439,12 +424,11 @@ export default function App() {
               }}
             />
 
-            {/* Selected Step quick preview / action */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               <div className="lg:col-span-8">
                 <StepDetailCard
                   step={currentStep}
-                  stepProgress={progress.steps[currentStep.id] || { status: 'not-started', completedCheckpoints: [], notes: '' }}
+                  stepProgress={progress.steps?.[currentStep.id] || { status: 'not-started', completedCheckpoints: [], notes: '' }}
                   onUpdateStatus={handleUpdateStatus}
                   onToggleCheckpoint={handleToggleCheckpoint}
                   onUpdateNotes={handleUpdateNotes}
@@ -455,17 +439,21 @@ export default function App() {
               </div>
 
               <div className="lg:col-span-4 space-y-6">
-                {/* Simulator widget */}
                 <BreakoutArchitectureSimulator />
               </div>
             </div>
           </div>
         )}
 
-        {/* Tab 2: Full Curriculum Step by Step */}
+        {activeTab === 'flow' && (
+          <div className="space-y-6">
+            <CurriculumOverviewTable />
+            <ToolsMatrixView />
+          </div>
+        )}
+
         {activeTab === 'curriculum' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Step list sidebar */}
             <div className="lg:col-span-4 space-y-2">
               <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 mb-3">
                 <div className="text-xs font-bold text-slate-300 mb-1">工程ナビゲーション</div>
@@ -476,7 +464,7 @@ export default function App() {
 
               <div className="space-y-1.5 max-h-[720px] overflow-y-auto pr-1">
                 {CURRICULUM_STEPS.map(step => {
-                  const s = progress.steps[step.id]?.status || 'not-started';
+                  const s = progress.steps?.[step.id]?.status || 'not-started';
                   const isSelected = activeStepId === step.id;
 
                   return (
@@ -522,11 +510,10 @@ export default function App() {
               </div>
             </div>
 
-            {/* Main detail card */}
             <div className="lg:col-span-8">
               <StepDetailCard
                 step={currentStep}
-                stepProgress={progress.steps[currentStep.id] || { status: 'not-started', completedCheckpoints: [], notes: '' }}
+                stepProgress={progress.steps?.[currentStep.id] || { status: 'not-started', completedCheckpoints: [], notes: '' }}
                 onUpdateStatus={handleUpdateStatus}
                 onToggleCheckpoint={handleToggleCheckpoint}
                 onUpdateNotes={handleUpdateNotes}
@@ -538,22 +525,12 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab: Full Flow Table (INPUT / OUTPUT) */}
-        {activeTab === 'flow' && (
-          <div className="space-y-6">
-            <CurriculumOverviewTable />
-            <ToolsMatrixView />
-          </div>
-        )}
-
-        {/* Tab 3: Standalone Simulator view */}
         {activeTab === 'simulator' && (
           <div className="space-y-6">
             <BreakoutArchitectureSimulator />
           </div>
         )}
 
-        {/* Tab 4: Evaluation Checklist */}
         {activeTab === 'evaluation' && (
           <div className="space-y-6">
             <EvaluationChecklistModal
@@ -565,14 +542,12 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab 5: Tools Matrix view */}
         {activeTab === 'tools' && (
           <div className="space-y-6">
             <ToolsMatrixView />
           </div>
         )}
 
-        {/* Tab 6: Standalone HTML Exporter */}
         {activeTab === 'standalone' && (
           <div className="space-y-6">
             <StandaloneHtmlExporter />
@@ -580,7 +555,6 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-950/60 py-6 px-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div>

@@ -1,20 +1,13 @@
 import React, { useState } from 'react';
-import { EVALUATION_ITEMS } from '../data/curriculum';
-import { Award, CheckCircle2, Copy, Check, X, ShieldAlert, Sparkles } from 'lucide-react';
+import { EVALUATION_ITEMS } from '../data/curriculum.js';
+import { Award, Copy, Check, Sparkles } from 'lucide-react';
 
-interface EvaluationChecklistModalProps {
-  evaluations: Record<string, boolean>;
-  onToggleItem: (id: string) => void;
-  onReset: () => void;
-  userName: string;
-}
-
-export const EvaluationChecklistModal: React.FC<EvaluationChecklistModalProps> = ({
-  evaluations,
+export function EvaluationChecklistModal({
+  evaluations = {},
   onToggleItem,
   onReset,
-  userName
-}) => {
+  userName = ''
+}) {
   const [copiedReport, setCopiedReport] = useState(false);
 
   const passedCount = EVALUATION_ITEMS.filter(item => evaluations[item.id]).length;
@@ -44,7 +37,6 @@ export const EvaluationChecklistModal: React.FC<EvaluationChecklistModalProps> =
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6">
-      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-2">
@@ -78,7 +70,6 @@ export const EvaluationChecklistModal: React.FC<EvaluationChecklistModalProps> =
         </div>
       </div>
 
-      {/* Score Summary Banner */}
       <div className={`p-4 rounded-xl border flex flex-wrap items-center justify-between gap-4 ${
         isAllPassed
           ? 'bg-emerald-950/30 border-emerald-500/50 text-emerald-300'
@@ -109,7 +100,6 @@ export const EvaluationChecklistModal: React.FC<EvaluationChecklistModalProps> =
         </div>
       </div>
 
-      {/* Items table / cards */}
       <div className="space-y-3">
         {EVALUATION_ITEMS.map((item, idx) => {
           const isPassed = !!evaluations[item.id];
@@ -169,4 +159,4 @@ export const EvaluationChecklistModal: React.FC<EvaluationChecklistModalProps> =
       </div>
     </div>
   );
-};
+}

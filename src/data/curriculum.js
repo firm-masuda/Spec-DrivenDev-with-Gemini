@@ -1,39 +1,3 @@
-export interface Step {
-  id: string;
-  orderNumber: string;
-  title: string;
-  category: 'upstream' | 'architecture' | 'environment' | 'implementation' | 'testing' | 'operations';
-  tools: ('Google AI Studio' | 'Antigravity Desktop' | 'Antigravity IDE')[];
-  artifact: string;
-  verifiedAgainst?: string;
-  goal: string;
-  description: string;
-  practicalSteps: {
-    title: string;
-    description: string;
-    codeSnippet?: string;
-    language?: string;
-  }[];
-  prompt?: string;
-  designIntent: {
-    summary: string;
-    points: { title: string; explanation: string }[];
-  };
-  checkpoints: {
-    id: string;
-    label: string;
-    detail: string;
-  }[];
-}
-
-export interface EvaluationItem {
-  id: string;
-  category: string;
-  title: string;
-  checkLocation: string;
-  description: string;
-}
-
 export const TOOLS_MATRIX = [
   {
     name: 'Google AI Studio',
@@ -70,7 +34,7 @@ export const TOOLS_MATRIX = [
   }
 ];
 
-export const CURRICULUM_STEPS: Step[] = [
+export const CURRICULUM_STEPS = [
   {
     id: 'step-01',
     orderNumber: '01',
@@ -671,7 +635,7 @@ git log --oneline --decorate -n 10`
   }
 ];
 
-export const EVALUATION_ITEMS: EvaluationItem[] = [
+export const EVALUATION_ITEMS = [
   {
     id: 'eval-1',
     category: '上流設計',
